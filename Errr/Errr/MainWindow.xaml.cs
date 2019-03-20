@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,10 +29,10 @@ namespace Errr
 
         public bool test(int n)
         {
-            if (n < 1) throw new ArgumentException ("Число должно быть > 1");
+            if (n < 1) throw new ArgumentException("Число должно быть > 1");
 
-                for (int i = 2; i < n; i++)
-                    if (n % i == 0) return false;
+            for (int i = 2; i < n; i++)
+                if (n % i == 0) return false;
 
             return true;
         }
@@ -40,6 +41,7 @@ namespace Errr
         {
             try
             {
+
                 bool a = test(int.Parse(tb.Text));
 
 
@@ -63,32 +65,90 @@ namespace Errr
 
         private void load_Click(object sender, RoutedEventArgs e)
         {
-            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
 
-            dlg.FileName = "Document";
-            dlg.DefaultExt = ".txt";
-            dlg.Filter = "Text documents (.txt)|*.txt";
 
-            dlg.ShowDialog();
-            string line;
-            System.IO.StreamReader file = new System.IO.StreamReader(dlg.FileName);
 
-            while ((line = file.ReadLine()) != null)
-            {
+            
+                Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
 
+                dlg.FileName = "Document";
+                dlg.DefaultExt = ".txt";
+                dlg.Filter = "Text documents (.txt)|*.txt";
+
+                dlg.ShowDialog();
+                using (System.IO.StreamReader sr = new System.IO.StreamReader(dlg.FileName))
+                {
+                    string line;
+                  
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                    try
+                    {
+                        if (int.Parse(line) < 1)
+                        {
+                            lb.Content = ("Ошибка загрузки:\n В файле присутствуют отрицательные числа");
+                            //inp.Items.Clear();
+                            // break;
+
+                        }
+
+
+                        bool a = test(int.Parse(line));
+                        if (a == false)
+                        {
+                            lb.Content = "Ошибка загрузки:\n В файле присутствуют не простые числа";
+                            //inp.Items.Clear();
+                            // break;
+
+                        }
+                        inp.Items.Add(int.Parse(line));
+                    }
+
+                    catch (FormatException)
+                    {
+
+                        lb.Content = "Ошибка загрузки:\n В файле присутствуют иные символы";
+
+                    }
+
+                    catch (Exception a)
+                    {
+
+                        lb.Content = "Невозможно прочитать файл: \n" + (a.Message);
+
+                    }
+                   
+                    }
+                    sr.Close();
+                }
             }
-            file.Close();
-        }
+
+            
+
+
+        
 
         private void save_Click(object sender, RoutedEventArgs e)
         {
-            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.FileName = "Document";
-            dlg.DefaultExt = ".txt";
-            dlg.Filter = "Text documents (.txt)|*.txt";
-            dlg.ShowDialog();
+
+                Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+                dlg.FileName = "Document";
+                dlg.DefaultExt = ".txt";
+                dlg.Filter = "Text documents (.txt)|*.txt";
+                dlg.ShowDialog();
 
 
-        }
+
+                using (StreamWriter outputFile = new StreamWriter(dlg.FileName))
+                {
+
+                    foreach (var item in inp.Items)
+                        outputFile.WriteLine(item.ToString());
+
+                }
+
+
+
+    }
     }
 }
